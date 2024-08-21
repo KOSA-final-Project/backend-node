@@ -1,0 +1,55 @@
+name: Deploy to Node
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+
+      - name: 📌 노드 빌드
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.15'
+
+      - name: 📌 의존성 추가
+        run: npm install
+
+      - name: 📌 zip 파일 생성
+        run: |
+          mkdir deploy-node
+          mkdir deploy-node/src
+          cp -r src/* ./deploy-node/src
+          cp ./docker-compose-node.blue.yml ./deploy-node/
+          cp ./docker-compose-node.green.yml ./deploy-node/
+          cp ./appspec.yml ./deploy-node/
+          cp ./Dockerfile ./deploy-node/
+          cp ./scripts/*.sh ./deploy-node/
+          cp ./package.json ./deploy-node/
+          cp ./package-lock.json ./deploy-node/
+          zip -r -qq ./latteve-node-build.zip ./deploy-node
+
+      - name: 📌 Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+
+      - name: 📌 S3에 업로드
+        run: |
+          aws s3 cp \
+            --region ap-northeast-2 \
+            ./latteve-node-build.zip s3://latteve-cicd-test
+      # 추가
+      - name: 📌 Code Deploy
+        run: aws deploy create-deployment --application-name node-deploy
+          --deployment-config-name CodeDeployDefault.OneAtATime
+          --deployment-group-name node-deploy-group
+          --s3-location bucket=latteve-cicd-test,bundleType=zip,key=latteve-node-build.zip
