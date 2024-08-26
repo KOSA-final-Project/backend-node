@@ -50,7 +50,7 @@ fi
 
 # 3
 REMOTE_EC2_USER="ec2-user"
-REMOTE_EC2_IP="13.125.220.15"
+REMOTE_EC2_IP="3.39.213.119"
 SSH_KEY_PATH="~/.ssh/kosa-msa3.pem"
 
 echo "Nginx 업데이트를 원격 EC2 인스턴스에서 실행합니다."
