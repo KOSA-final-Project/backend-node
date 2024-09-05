@@ -1,6 +1,6 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
-
+const {getAllMembers, postMember, getMember, updateMember, deleteMember} = require('../modules/controllers/memberController');
 const router = express.Router();
 const secretKey = process.env.COOKIE_SECRET;
 
@@ -14,6 +14,15 @@ router.route('/health-check')
 	.get((req,res)=>{
 		res.send('up')
 	});
+
+router.route('/member')
+	.get(getAllMembers)
+	.post(postMember);
+
+router.route('/member/:id')
+	.get(getMember)
+	.put(updateMember)
+	.delete(deleteMember);
 
 router.route('/get-member-id')
 	.get((req,res)=>{
