@@ -2,7 +2,11 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
+const dbConnect = require('./modules/config/mongodb');
+const errorHandler = require('./modules/middlewares/errorHandler');
 
+
+dbConnect();
 dotenv.config();
 const indexRouter = require('./router/index');
 const app = express();
@@ -22,18 +26,19 @@ app.use((req, res, next) => {
 
 app.use('/node-api', indexRouter); // 라우터
 
-app.use((req,res,next) => {
-    res.status(404).send('Not Found_페이지를 찾을 수 없습니다.');
-    next();
+
+// 테스트용
+app.get('/error-test', (req, res, next) => {
+    const error = new Error('에러 핸들러 테스트입니다!');
+    error.status = 500;
+    next(error);
 });
-app.use((err,req,res,next) => {
-    console.error(err);
-    res.status(500).send(err.message);
-})
+
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 7070;
 app.listen(app.get('port'), ()=>{
     console.log(`현재 이 서버는 ${PORT}번 포트에서 가동 중입니다.`);
 })
 
-// aa
