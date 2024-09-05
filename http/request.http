@@ -1,0 +1,42 @@
+### root
+GET http://localhost:7070/node-api/
+
+### member 생성
+@id=1
+@email="vosxja1@gmail.com"
+@nickname="반성문은영어로글로벌"
+@img_url="https://cdn.eyesmag.com/content/uploads/posts/2020/08/11/the-patrick-star-show-spongebob-squarepants-spin-off-1-516d0d4f-fcf0-4106-ab95-a407167fee2c.jpg"
+POST http://localhost:7070/node-api/member
+Content-Type: application/json
+
+{
+  "_id": {{id}},
+  "email": {{email}},
+  "nickname": {{nickname}},
+  "img_url": {{img_url}}
+}
+
+### member 전체 조회
+GET http://localhost:7070/node-api/member
+
+### member 일부 조회
+GET http://localhost:7070/node-api/member/{{id}}
+
+
+
+### member 수정
+@after_nickname="딸기가튀면딸기쨈"
+@after_img_url="https://cdn2.ppomppu.co.kr/zboard/data3/2018/1229/1546010943_5600_1546010715702.jpg"
+PUT http://localhost:7070/node-api/member/{{id}}
+Content-Type: application/json
+
+{
+  "nickname": {{after_nickname}},
+  "img_url": {{after_img_url}}
+}
+
+### member 삭제
+DELETE http://localhost:7070/node-api/member/{{id}}
+
+### member 전체 조회
+GET http://localhost:7070/node-api/member
