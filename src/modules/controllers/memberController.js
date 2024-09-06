@@ -26,13 +26,20 @@ const postMember =
 		if (!memberId || !email || !nickname || !imgUrl) {
 			return res.status(400).send("필수 값이 입력되지 않았습니다.")
 		}
-		const user ={
+		const user = {
 			_id: memberId,
 			email: email,
 			nickname: nickname,
 			img_url: imgUrl,
 		};
-		const member = await Member.create(user);
+		const member = await Member.updateOne({_id: memberId}, {
+			$set: {
+				email: email,
+				nickname: nickname,
+				img_url: imgUrl,
+			},
+		}, {upsert: true});
+
 		res.status(201).send("멤버 생성 성공");
 	})
 
