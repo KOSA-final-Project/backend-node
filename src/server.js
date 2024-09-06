@@ -2,9 +2,9 @@ const express = require('express');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
-const dbConnect = require('./modules/config/mongodb');
+const dbConnect = require('./modules/config/mongo/mongodb');
 const errorHandler = require('./modules/middlewares/errorHandler');
-
+const receiveMessages = require('./modules/config/rabbitmq/consumer/consumer');
 
 dbConnect();
 dotenv.config();
@@ -26,6 +26,7 @@ app.use((req, res, next) => {
 
 app.use('/node-api', indexRouter); // 라우터
 
+receiveMessages();
 
 // 테스트용
 app.get('/error-test', (req, res, next) => {

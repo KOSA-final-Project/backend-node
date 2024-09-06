@@ -22,13 +22,17 @@ const getAllMembers =
 const postMember =
 	asyncHandler(async (req, res) => {
 		console.log(req.body);
-		const {_id, email, nickname, img_url} = req.body;
-		if (!_id || !email || !nickname || !img_url) {
+		const {memberId, email, nickname, imgUrl} = req.body;
+		if (!memberId || !email || !nickname || !imgUrl) {
 			return res.status(400).send("필수 값이 입력되지 않았습니다.")
 		}
-		const member = await Member.create({
-			_id, email, nickname, img_url
-		});
+		const user ={
+			_id: memberId,
+			email: email,
+			nickname: nickname,
+			img_url: imgUrl,
+		};
+		const member = await Member.create(user);
 		res.status(201).send("멤버 생성 성공");
 	})
 
