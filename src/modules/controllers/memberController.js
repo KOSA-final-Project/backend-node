@@ -6,6 +6,7 @@
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 2024-09-05        Yeong-Huns       최초 생성
+ * 2024-09-06        yunbin           로그인한 사용자 member id로 변경
  */
 
 const asyncHandler = require("express-async-handler");
@@ -75,6 +76,5 @@ const deleteMember =
 		await Member.deleteOne();
 		res.send("member 삭제 완료");
 	});
-
 
 module.exports = {getAllMembers, postMember, getMember, updateMember, deleteMember};
