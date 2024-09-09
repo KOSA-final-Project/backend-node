@@ -12,7 +12,7 @@
 const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
-		chat_rood_id: {
+		chat_room_id: {
 			type: String,
 			required: true,
 			index: true,
@@ -32,8 +32,9 @@ const messageSchema = new mongoose.Schema({
 			required: true,
 		},
 	}, {
-		timestamps: {createdAt: 'created_at', updatedAt: false}
-	},{ versionKey: false });
+		timestamps: {createdAt: 'created_at', updatedAt: false},
+		versionKey: false
+	});
 
 messageSchema.index({ chat_room_id: 1, created_at: -1 }); // chatRoom & 생성시간 인덱스
 

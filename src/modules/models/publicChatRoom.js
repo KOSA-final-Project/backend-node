@@ -26,6 +26,7 @@ const publicChatRoomSchema = new mongoose.Schema({
 				ref: 'Member',
 				required: true,
 			},
+			_id: false
 		},
 	],
 },{ versionKey: false })
