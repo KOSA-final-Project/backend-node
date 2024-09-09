@@ -30,7 +30,11 @@ const memberSchema = new mongoose.Schema({
 	},
 	is_deleted: {
 		type: Date
-	}
+	},
+	chat_room_list: [{
+		type: mongoose.Schema.Types.ObjectId,
+		ref: 'PrivateChatRoom'
+	}]
 },{ versionKey: false })
 const MemberCollections = mongoose.model("Member", memberSchema);
 
