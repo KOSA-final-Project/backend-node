@@ -17,6 +17,7 @@ const dbConnect = async () => {
 		console.log("DB 연결완료");
 	} catch (err) {
 		console.log("DB 연결실패");
+		process.exit(1);
 	}
 }
 module.exports = dbConnect;
