@@ -40,3 +40,26 @@ DELETE http://localhost:7070/node-api/member/{{id}}
 
 ### member 전체 조회
 GET http://localhost:7070/node-api/member
+
+### privateChatRoom 생성
+POST http://localhost:7070/node-api/private-chat-rooms
+Content-Type: application/json
+
+{
+  "participants": [19, 13]
+}
+
+### message 생성
+POST http://localhost:7070/node-api/messages
+Content-Type: application/json
+
+{
+  "chat_room_id": "66dc435814a1d09c1e327590",
+  "sender_id": "13",
+  "sender_nickname": "윤빈",
+  "content": "집가고 싶어요",
+  "is_read": "false"
+}
+
+### private chat room 조회
+GET http://localhost:7070/node-api/private-chat-rooms
