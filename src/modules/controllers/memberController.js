@@ -24,7 +24,7 @@ const postMember =
 	asyncHandler(async (req, res) => {
 		console.log(req.body);
 		const {memberId, email, nickname, imgUrl} = req.body;
-		if (!memberId || !email || !nickname || !imgUrl) {
+		if (!memberId || !email || !imgUrl) {
 			return res.status(400).send("필수 값이 입력되지 않았습니다.")
 		}
 		const user = {
