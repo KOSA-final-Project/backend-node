@@ -84,7 +84,7 @@ const getPrivateChatRooms =
 
             // 해당 채팅방의 메시지 가져오기
             const messages = await Message.find({ chat_room_id: room._id })
-                .sort({ created_at: -1 }) // 최신 메시지부터 정렬
+                .sort({ created_at: 1 }) // 오래된 메세지부터 정렬
                 .exec();
 
             return {
