@@ -39,28 +39,29 @@ module.exports = (server) => {
             console.log('쿠키가 존재하지 않습니다.');
         }
 
-        // 특정 클라이언트에게 메시지 보내기
-        socket.on('private message', (targetMemberId, msg) => {
-            // memberId를 이용해 socket.id 찾기
-            const targetSocketId = Object.keys(clients).find(id => clients[id] === targetMemberId);
+        // 클라이언트가 특정 채팅방에 입장 (방에 참여)
+        socket.on('join room', (roomId) => {
+            socket.join(roomId);
+            console.log(`Socket ${socket.id} joined room ${roomId}`);
+        });
 
-            if (targetSocketId) {
-                // 해당 클라이언트에게 메시지 보내기
-                io.to(targetSocketId).emit('private message', {
-                    from: clients[socket.id], // 메시지를 보낸 사용자
-                    message: msg
-                });
-                console.log(`메시지 전송: ${clients[socket.id]} -> ${targetMemberId}: ${msg}`);
-            } else {
-                console.log(`사용자 ${targetMemberId}를 찾을 수 없음`);
-            }
+        // 특정 방에 있는 사용자들에게 메시지 보내기
+        socket.on('private message', (msg) => {
+            const { roomId, from, message } = msg;
+
+            // 해당 roomId에 있는 모든 클라이언트에게 메시지 전송
+            io.to(roomId).emit('private message', {
+                from, // 보낸 사람 ID
+                message, // 메시지 내용
+                roomId // 방 ID
+            });
+            console.log(`Message from ${from} to room ${roomId}: ${message}`);
         });
 
         socket.on('disconnect', ()=>{ // 연결 종료 시
             console.log('클라이언트 접속 해제', ip, socket.id);
             delete clients[socket.id]; // 연결 해제 시 클라이언트 목록에서 제거
             console.log(clients);
-            clearInterval(socket.interval);
         });
 
         socket.on('error', (error)=> { // 에러 시
