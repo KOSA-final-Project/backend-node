@@ -46,7 +46,7 @@ POST http://localhost:7070/node-api/private-chat-rooms
 Content-Type: application/json
 
 {
-  "participants": [19, 13]
+  "participants": [54, 52]
 }
 
 ### message 생성
@@ -54,11 +54,11 @@ POST http://localhost:7070/node-api/messages
 Content-Type: application/json
 
 {
-  "chat_room_id": "66dc435814a1d09c1e327590",
-  "sender_id": "13",
-  "sender_nickname": "윤빈",
-  "content": "집가고 싶어요",
-  "is_read": "false"
+  "chat_room_id": "66df4379fa8318e805341a7c",
+  "sender_id": "54",
+  "sender_nickname": "개발조아요",
+  "content": "안녕하세요 c++ 질문드려도 될까요?",
+  "is_read": "true"
 }
 
 ### private chat room 조회
