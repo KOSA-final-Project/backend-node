@@ -18,6 +18,7 @@ module.exports = (server) => {
     io.on('connection', async (socket) => { // 웹 소켓 연결 시
         const req = socket.request;
         const ip = req.socket.remoteAddress; // 클라이언트의 ip 주소
+        console.log("ip 진짜 나와요? :", ip)
         console.log('새로운 클라이언트 접속!', ip, socket.id);
 
         // 쿠키에서 JWT 토큰을 가져와 memberId 추출

@@ -6,20 +6,24 @@
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 2024-09-05        Yeong-Huns       최초 생성
+ * 2024-09-05        Yeong-Huns       라운드 로빈 방식 -> 각 서버 고유 큐 지정
  */
 const amqp = require('amqplib');
 const asyncHandler = require('express-async-handler');
 require('dotenv').config();
 const queueHandler = require('../handler/queueHandlers');
+const {v4: uuidv4} = require('uuid');
 
+const serverId = uuidv4();
+console.log(`ServerID :  ${serverId}`);
 const handleApplicationMessage = asyncHandler(async (message) => {
 	console.log(`Application 처리 로직 실행: ${JSON.stringify(message)}`);
-	// 실제 로직 추가
+
 });
 
 const handleApprovalMessage = asyncHandler(async (message) => {
 	console.log(`Approval 처리 로직 실행: ${JSON.stringify(message)}`);
-	// 실제 로직 추가
+
 });
 
 
@@ -31,19 +35,19 @@ const receiveMessages = asyncHandler(async () => {
 	await channel.assertExchange('alarmExchange', 'topic', { durable: true });
 	console.log('Exchange(alarmExchange) 동작확인...');
 
-	await channel.assertQueue('alarm.queue', { durable: true ,
+	await channel.assertQueue(serverId, { durable: false ,
 		arguments : {
 			'x-dead-letter-exchange': 'deadLetterExchange',
 			'x-dead-letter-routing-key': 'deadLetter',
 		}});
-	console.log('큐(alarm.queue) 동작확인...');
+	console.log(`큐(${serverId}) 동작확인...`);
 
-	await channel.bindQueue('alarm.queue', 'alarmExchange', 'application');
-	await channel.bindQueue('alarm.queue', 'alarmExchange', 'approval');
+	await channel.bindQueue(serverId, 'alarmExchange', 'application');
+	await channel.bindQueue(serverId, 'alarmExchange', 'approval');
 	console.log('알람 Exchange 바인딩 확인 ...');
 
 	await channel.consume(
-		'alarm.queue',
+		serverId,
 		asyncHandler(async (msg) => {
 			if (msg !== null) {
 				const messageContent = JSON.parse(msg.content.toString());
@@ -84,33 +88,31 @@ const receiveMessages = asyncHandler(async () => {
 		console.log(`${queue} : 메세지 수신 대기중`);
 
 		// 각 큐의 메시지 수신
-		await channel.consume(
-			queue,
-			asyncHandler(async (msg) => {
-				if (msg !== null) {
-					console.log(`메세지 수신: ${msg.content.toString()}`);
-					const messageContent = JSON.parse(msg.content.toString());
+		channel.consume(queue, async (msg) => {
+			if (msg !== null) {
+				console.log(`메세지 수신: ${msg.content.toString()}`);
+				const messageContent = JSON.parse(msg.content.toString());
 
-					const handler = queueHandler[queue];
 
-					if (handler) {
-						// 요청 객체를 만들어 핸들러 호출
-						const req = { body: messageContent };
-						const res = {
-							status: (code) => ({
-								send: (message) => console.log(`Status: ${code}, Message: ${message}`),
-							}),
-						};
-						await handler(req, res);
-					} else {
-						console.log(`해당 queue 를 처리할 함수가 없습니다 : ${queue}`);
-					}
-					channel.ack(msg);
+				const handler = queueHandler[queue];
+
+				if (handler) {
+					// 요청 객체를 만들어 핸들러 호출
+					const req = {body: messageContent};
+					const res = {
+						status: (code) => ({
+							send: (message) => console.log(`Status: ${code}, Message: ${message}`),
+						}),
+					};
+					await handler(req, res);
 				} else {
-					console.log('RabbitMQ 메세지 수신 실패');
+					console.log(`해당 queue 를 처리할 함수가 없습니다 : ${queue}`)
 				}
-			})
-		);
+				channel.ack(msg);
+			} else {
+				console.log("RabbitMQ 메세지 수신 실패")
+			}
+		});
 	}
 });
 
