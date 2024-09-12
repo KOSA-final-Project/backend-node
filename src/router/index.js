@@ -12,6 +12,11 @@ router.route('/')
 		res.send('Welcome');
 	});
 
+router.route('/fuck')
+	.get((req, res) => {
+		res.send('no');
+	});
+
 
 router.route('/health-check')
 	.get((req,res)=>{
