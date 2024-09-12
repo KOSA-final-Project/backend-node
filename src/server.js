@@ -16,17 +16,22 @@ const indexRouter = require('./router/index');
 const app = express();
 app.set('port', process.env.PORT || 7070);
 
+// CORS 설정을 동적으로 생성
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+        ? 'https://latteve.site'
+        : 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true
+};
+
 // 미들웨어 설정
 app.use(
     morgan('dev'),
     express.json(),
     express.urlencoded({extended: false}),
     cookieParser(process.env.COOKIE_SECRET),
-    cors({
-            origin: 'http://localhost:3000',
-            methods: ['GET', 'POST'],
-            credentials: true
-        })
+    cors(corsOptions)
     );
 
 // 모든 요청 처리 로그 미들웨어
