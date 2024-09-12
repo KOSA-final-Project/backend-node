@@ -33,7 +33,7 @@ jobs:
           cp ./scripts/*.sh ./deploy-node/
           cp ./package.json ./deploy-node/
           cp ./package-lock.json ./deploy-node/
-          cp ./babelrc ./deploy-node/
+          cp ./.babelrc ./deploy-node/
           cp .env ./deploy-node/
           zip -r -qq ./latteve-node-build.zip ./deploy-node
 
