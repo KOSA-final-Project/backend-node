@@ -35,7 +35,7 @@ app.use((req, res, next) => {
     next();
 })
 
-app.use('/node-api', indexRouter); // 라우터
+app.use('/', indexRouter); // 라우터
 
 receiveMessages();
 
