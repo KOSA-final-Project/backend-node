@@ -2,6 +2,7 @@ version: '3'
 services:
   backend:
     build: .
+    command: npm start
     ports:
       - "7072:7070"
     container_name: node-green
