@@ -10,7 +10,9 @@ EXIST_BLUE=$(sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-no
 # 1
 if [ -z "$EXIST_BLUE" ]; then
         echo "blue up"
-        sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-node.blue.yml up -d -no-cache --progress=plain
+        
+         sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-node.blue.yml build --no-cache --progress=plain
+         sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-node.blue.yml up -d
 
         BEFORE_COLOR="green"
         AFTER_COLOR="blue"
@@ -18,7 +20,10 @@ if [ -z "$EXIST_BLUE" ]; then
         AFTER_PORT=7071
 else
         echo "green up"
-        sudo docker-compose -p ${DOCKER_APP_NAME}-green -f docker-compose-node.green.yml up -d -no-cache --progress=plain
+
+         sudo docker-compose -p ${DOCKER_APP_NAME}-green -f docker-compose-node.green.yml build --no-cache --progress=plain
+         sudo docker-compose -p ${DOCKER_APP_NAME}-green -f docker-compose-node.green.yml up -d
+
 
         BEFORE_COLOR="blue"
         AFTER_COLOR="green"
