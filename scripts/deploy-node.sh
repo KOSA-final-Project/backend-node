@@ -10,7 +10,7 @@ EXIST_BLUE=$(sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-no
 # 1
 if [ -z "$EXIST_BLUE" ]; then
         echo "blue up"
-         sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-node.blue.yml build --no-cache
+         sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-node.blue.yml build --no-cache --progress=plain
          sudo docker-compose -p ${DOCKER_APP_NAME}-blue -f docker-compose-node.blue.yml up -d
 
 
@@ -20,7 +20,7 @@ if [ -z "$EXIST_BLUE" ]; then
         AFTER_PORT=7071
 else
         echo "green up"
-         sudo docker-compose -p ${DOCKER_APP_NAME}-green -f docker-compose-node.green.yml build --no-cache
+         sudo docker-compose -p ${DOCKER_APP_NAME}-green -f docker-compose-node.green.yml build --no-cache --progress=plain
          sudo docker-compose -p ${DOCKER_APP_NAME}-green -f docker-compose-node.green.yml up -d
 
 
@@ -49,6 +49,8 @@ done
 if [ $cnt -eq 10 ]
 then
         echo "서버가 정상적으로 구동되지 않았습니다."
+        echo "컨테이너 내부 확인:"
+        sudo docker-compose -p ${DOCKER_APP_NAME}-${AFTER_COLOR} -f docker-compose-node.${AFTER_COLOR}.yml exec backend /bin/sh -c "ls -R /app && cat /app/src/server.js"
         exit 1
 fi
 
