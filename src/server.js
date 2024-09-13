@@ -62,6 +62,6 @@ socket(server); // socket.js에서 Socket.io 로직을 설정
 app.use(errorHandler);
 const PORT = process.env.PORT || 7070;
 server.listen(PORT, ()=>{
-    console.log(`현재 이 서버는 ${PORT}번 포트에서 가동 중입니다.`);
+    console.log(`현재 이 서버는 ${PORT}번 포트에서 가동 중입니다. 최신버전입니다.`);
 })
 
