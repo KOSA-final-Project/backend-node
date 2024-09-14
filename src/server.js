@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
 const dbConnect = require('./modules/config/mongo/mongodb');
 const errorHandler = require('./modules/middlewares/errorhandler');
-const receiveMessages = require('./modules/config/rabbitmq/consumer/consumer');
+const { receiveMessages } = require('./modules/config/rabbitmq/consumer/consumer');
 const cors = require('cors');
 const socket = require('./socket');
 
@@ -42,7 +42,19 @@ app.use((req, res, next) => {
 
 app.use('/', indexRouter); // 라우터
 
-receiveMessages();
+
+// 서버 생성
+const server = http.createServer(app);
+
+receiveMessages()
+    .then(() => {
+        console.log('RabbitMQ 초기화 완료.');
+        socket(server);
+    })
+    .catch(error => {
+        console.error('RabbitMQ 초기화 실패:', error);
+        process.exit(1);
+    });
 
 // 테스트용
 app.get('/error-test', (req, res, next) => {
@@ -50,14 +62,6 @@ app.get('/error-test', (req, res, next) => {
     error.status = 500;
     next(error);
 });
-
-
-
-// 서버 생성
-const server = http.createServer(app);
-
-// Socket.io를 서버에 통합
-socket(server); // socket.js에서 Socket.io 로직을 설정
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 7070;
