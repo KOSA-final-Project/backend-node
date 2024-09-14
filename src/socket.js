@@ -1,9 +1,15 @@
 const SocketIO = require('socket.io');
 const { decode } = require('./modules/jwt/decodeToken');
+let io;
+// 연결된 클라이언트 저장용 객체
+let clients = {}
+const { getServerId, getChannel } = require('./modules/config/rabbitmq/consumer/consumer')
 const Member = require('./modules/models/member');
+const asyncHandler = require("express-async-handler");
+const { setIO, setClients } = require('./modules/config/rabbitmq/handler/alarmHandler');
 
 module.exports = (server) => {
-    const io = SocketIO(server, {
+    io = SocketIO(server, {
         cors: {
             origin: 'http://localhost:3000',
             methods: ['GET', 'POST'],
@@ -12,10 +18,10 @@ module.exports = (server) => {
         path: '/socket.io'
     });
 
-    // 연결된 클라이언트 저장용 객체
-    let clients = {}
+    setIO(io);
+    setClients(clients);
 
-    io.on('connection', async (socket) => { // 웹 소켓 연결 시
+    io.on('connection', asyncHandler(async (socket) => { // 웹 소켓 연결 시
         const req = socket.request;
         const ip = req.socket.remoteAddress; // 클라이언트의 ip 주소
         console.log("ip 진짜 나와요? :", ip)
@@ -34,6 +40,18 @@ module.exports = (server) => {
                 clients[member.memberId] = socket.id; // memberId 등록
                 console.log(`${member.memberId}(${socket.id}) 등록됨`);
                 console.log(clients);
+
+                const queueName = getServerId();
+                const channel = getChannel();
+                const routingKey = `user.${member.memberId}`;
+
+                if (!channel) {
+                    console.error('RabbitMQ 채널이 초기화되지 않았습니다.');
+                    return;
+                }
+
+                await channel.bindQueue(queueName, 'alarmExchange', routingKey);
+                console.log(`RabbitMQ가 해당 라우팅 키를 수신합니다.: ${routingKey} -> ${queueName}`);
 
                 // 사용자의 chat_room_list를 사용하여 해당하는 방들에 join
                 try {
@@ -79,14 +97,32 @@ module.exports = (server) => {
             console.log(`Message from ${from} to room ${roomId}: ${message}`);
         });
 
-        socket.on('disconnect', () => { // 연결 종료 시
+        socket.on('disconnect', asyncHandler(async () => { // 연결 종료 시
             console.log('클라이언트 접속 해제', ip, socket.id);
+            const memberId = Object.keys(clients).find(key => clients[key] === socket.id);
+            const routingKey = `user.${memberId}`;
+            const queueName = getServerId();
+            const channel = getChannel();
+
+            if (!channel) {
+                console.error('RabbitMQ 채널이 초기화되지 않았습니다.');
+                return;
+            }
+
+            await channel.unbindQueue(queueName, 'alarmExchange', routingKey);
+            console.log(`RabbitMQ에서 해당 라우팅키를 제거합니다.: ${routingKey} -> ${queueName}`);
             delete clients[socket.id]; // 연결 해제 시 클라이언트 목록에서 제거
             console.log(clients);
-        });
+        }));
 
         socket.on('error', (error) => { // 에러 시
             console.error(error);
         });
-    });
+    }));
 };
+function getClients() {
+    return clients;
+}
+
+module.exports.getClients = getClients;
+
