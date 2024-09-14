@@ -1,9 +1,12 @@
 const SocketIO = require('socket.io');
 const { decode } = require('./modules/jwt/decodeToken');
+let io;
+// 연결된 클라이언트 저장용 객체
+let clients = {}
 const Member = require('./modules/models/member');
 
 module.exports = (server) => {
-    const io = SocketIO(server, {
+    io = SocketIO(server, {
         cors: {
             origin: 'http://localhost:3000',
             methods: ['GET', 'POST'],
@@ -12,8 +15,7 @@ module.exports = (server) => {
         path: '/socket.io'
     });
 
-    // 연결된 클라이언트 저장용 객체
-    let clients = {}
+
 
     io.on('connection', async (socket) => { // 웹 소켓 연결 시
         const req = socket.request;
@@ -90,3 +92,14 @@ module.exports = (server) => {
         });
     });
 };
+function getClients() {
+    return clients;
+}
+module.exports.emitAlarm = (type, message) => {
+    if (!io) {
+        throw new Error('Socket.io not initialized!');
+    }
+    io.emit('alarm', { type, message });
+    console.log(`Alarm emitted: ${type}, ${JSON.stringify(message)}`);
+};
+module.exports.getClients = getClients;
