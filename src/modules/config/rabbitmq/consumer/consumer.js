@@ -13,17 +13,30 @@ const asyncHandler = require('express-async-handler');
 require('dotenv').config();
 const queueHandler = require('../handler/queueHandlers');
 const {v4: uuidv4} = require('uuid');
+const { emitAlarm, getClients } = require('../../../../socket');
+
 
 const serverId = uuidv4();
 console.log(`ServerID :  ${serverId}`);
 const handleApplicationMessage = asyncHandler(async (message) => {
-	console.log(`Application 처리 로직 실행: ${JSON.stringify(message)}`);
+	const clients = getClients();
+	console.log(clients)
+	const content =  JSON.parse(JSON.stringify(message));
+	if(content.projectLeaderId in clients){
+		emitAlarm('application-message', content);
+	}
+	console.log(`Application 처리 로직 실행: ${content}`);
 
 });
 
 const handleApprovalMessage = asyncHandler(async (message) => {
-	console.log(`Approval 처리 로직 실행: ${JSON.stringify(message)}`);
-
+	const clients = getClients();
+	console.log(clients)
+	const content =  JSON.parse(JSON.stringify(message));
+	if(content.receiverMemberId in clients){
+		emitAlarm('approval-message', content);
+	}
+	console.log(`Approval 처리 로직 실행: ${content}`);
 });
 
 
