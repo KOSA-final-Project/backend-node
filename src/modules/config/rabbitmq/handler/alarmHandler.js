@@ -20,6 +20,8 @@ function emitAlarm(target, message) {
 	}
 	const targetId = target;
 	const targetSocketId = clients[targetId];
+	console.log(`타겟아이디: ${targetId}, 타겟의 소켓ID: ${targetSocketId}`);
+
 
 	if (targetSocketId) {
 		io.to(targetSocketId).emit('alarm', { message }); // 특정 소켓에만 이벤트 전달

@@ -50,11 +50,21 @@ const postPrivateChatRoom = asyncHandler(async (req, res) => {
 
 const getPrivateChatRooms =
     asyncHandler(async (req, res)=>{
-        // JWT 토큰에서 현재 사용자 memberId 추출
-        console.log("jwt", req.cookies.jwt);
-        const result = decode(req.cookies.jwt, secretKey);
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ message: '인증 실패: Authorization 헤더가 없습니다.' });
+        }
+        const jwtToken = authHeader.split(' ')[1];
+        if (!jwtToken) {
+            return res.status(401).json({ message: '인증 실패: 유효하지 않은 Authorization 헤더 형식입니다.' });
+        }
+        const result = decode(jwtToken, secretKey);
+
+        if (!result) {
+            return res.status(401).json({ message: '인증 실패: 유효하지 않은 토큰' });
+        }
         const currentMemberId = result.memberId;
-        //const currentMemberId = 13;
+
 
         // 해당 멤버의 chat_room_list를 가져옴
         const member = await Member.findById(currentMemberId);
