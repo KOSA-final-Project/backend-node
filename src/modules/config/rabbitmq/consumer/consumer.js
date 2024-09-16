@@ -28,6 +28,9 @@ const receiveMessages = async () => {
 		await channel.assertExchange('alarmExchange', 'topic', { durable: true });
 		console.log('Exchange(alarmExchange) 동작확인...');
 
+		await channel.assertExchange('chatExchange', 'topic', { durable: true });
+		console.log('Exchange(chatExchange) 동작확인...');
+
 		await channel.assertQueue(serverId, {
 			durable: false,
 			arguments: {
@@ -37,9 +40,9 @@ const receiveMessages = async () => {
 		});
 		console.log(`큐(${serverId}) 동작확인...`);
 
-		await channel.bindQueue(serverId, 'alarmExchange', 'application');
+		/*await channel.bindQueue(serverId, 'alarmExchange', 'application');
 		await channel.bindQueue(serverId, 'alarmExchange', 'approval');
-		console.log('알람 Exchange 바인딩 확인 ...');
+		console.log('알람 Exchange 바인딩 확인 ...');*/
 
 		await channel.consume(serverId, async (msg) => {
 			if (msg !== null) {
