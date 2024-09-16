@@ -23,18 +23,23 @@ module.exports = (server) => {
 
     io.on('connection', asyncHandler(async (socket) => { // 웹 소켓 연결 시
         const req = socket.request;
-        const ip = req.socket.remoteAddress; // 클라이언트의 ip 주소
-        console.log("ip 진짜 나와요? :", ip)
-        console.log('새로운 클라이언트 접속!', ip, socket.id);
+        console.log('새로운 클라이언트 접속!', socket.id);
 
-        // 쿠키에서 JWT 토큰을 가져와 memberId 추출
-        const cookies = req.headers.cookie;
+        //핸드쉐이크 과정에서 auth 로 토큰가져옴
+        const { token } = socket.handshake.auth;
         const secretKey = process.env.COOKIE_SECRET;
+        console.log(`핸드쉐이크 성공, 받은 토큰 : ${token}`);
+        if (token) {
 
-        if (cookies) {
-            const jwtToken = cookies.split('; ').find(row => row.startsWith('jwt=')).split('=')[1];
+            console.log('토큰 수신 성공 : ', token);
 
-            const member = decode(jwtToken, secretKey);
+            // JWT 토큰 디코딩
+            const member = decode(token, secretKey);
+
+            if (!member) {
+                console.error('인증 실패: 유효하지 않은 토큰입니다.');
+                return;
+            }
 
             if (member && member.memberId) {
                 clients[member.memberId] = socket.id; // memberId 등록
@@ -73,7 +78,7 @@ module.exports = (server) => {
                 console.log('토큰에서 memberId를 가져오지 못했습니다.');
             }
         } else {
-            console.log('쿠키가 존재하지 않습니다.');
+            console.log('Authorization 헤더가 존재하지 않습니다.');
         }
 
         // 클라이언트가 특정 채팅방에 입장 (방에 참여)
@@ -84,7 +89,7 @@ module.exports = (server) => {
 
         // 특정 방에 있는 사용자들에게 메시지 보내기
         socket.on('private message', (msg) => {
-            const {roomId, from, message, fromNickname, fromImgUrl} = msg;
+            const { roomId, from, message, fromNickname, fromImgUrl } = msg;
 
             // 해당 roomId에 있는 모든 클라이언트에게 메시지 전송
             io.to(roomId).emit('private message', {
@@ -98,7 +103,7 @@ module.exports = (server) => {
         });
 
         socket.on('disconnect', asyncHandler(async () => { // 연결 종료 시
-            console.log('클라이언트 접속 해제', ip, socket.id);
+            console.log('클라이언트 접속 해제',socket.id);
             const memberId = Object.keys(clients).find(key => clients[key] === socket.id);
             const routingKey = `user.${memberId}`;
             const queueName = getServerId();

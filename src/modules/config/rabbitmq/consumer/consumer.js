@@ -122,7 +122,7 @@ const handleApplicationMessage = async (message) => {
 		jobName: content.jobName,
 	}
 	emitAlarm(content.projectLeaderId, applicationAlarm);
-	console.log(`Application 처리 로직 실행: ${applicationAlarm}`);
+	console.log(`Application 처리 로직 실행: ${JSON.stringify(applicationAlarm)}`);
 };
 
 const handleApprovalMessage = async (message) => {
@@ -133,7 +133,7 @@ const handleApprovalMessage = async (message) => {
 		acceptStatus: content.acceptStatus,
 	}
 	emitAlarm(content.receiverMemberId, approvalAlarm);
-	console.log(`Approval 처리 로직 실행: ${approvalAlarm}`);
+	console.log(`Approval 처리 로직 실행: ${JSON.stringify(approvalAlarm)}`);
 };
 
 
