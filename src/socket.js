@@ -11,7 +11,7 @@ const { setIO, setClients } = require('./modules/config/rabbitmq/handler/alarmHa
 module.exports = (server) => {
     io = SocketIO(server, {
         cors: {
-            origin: ['http://localhost:3000', 'https://latteve.site'],
+            origin: ['http://localhost:3000', 'https://www.latteve.site'],
             methods: ['GET', 'POST'],
             credentials: true
         },
