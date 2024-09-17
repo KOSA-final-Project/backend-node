@@ -56,6 +56,7 @@ module.exports = (server) => {
                 }
 
                 await channel.bindQueue(queueName, 'alarmExchange', routingKey);
+                await channel.bindQueue(queueName, 'chatExchange', routingKey);
                 console.log(`RabbitMQ가 해당 라우팅 키를 수신합니다.: ${routingKey} -> ${queueName}`);
 
                 // 사용자의 chat_room_list를 사용하여 해당하는 방들에 join
@@ -90,16 +91,25 @@ module.exports = (server) => {
         // 특정 방에 있는 사용자들에게 메시지 보내기
         socket.on('private message', (msg) => {
             const { roomId, from, message, fromNickname, fromImgUrl } = msg;
+            const sendMessage = {
+                ...msg,
+                type: 'private'
+            }
+            const channel = getChannel();
+            if(channel){
+                channel.publish('chatExchange', '', Buffer.from(JSON.stringify(sendMessage)));
+                console.log('RabbitMQ에 메시지 발행:', msg);
+            }
 
             // 해당 roomId에 있는 모든 클라이언트에게 메시지 전송
-            io.to(roomId).emit('private message', {
+            /*io.to(roomId).emit('private message', {
                 from, // 보낸 사람 ID
                 fromNickname,
                 fromImgUrl,
                 message, // 메시지 내용
                 roomId // 방 ID
             });
-            console.log(`Message from ${from} to room ${roomId}: ${message}`);
+            console.log(`Message from ${from} to room ${roomId}: ${message}`);*/
         });
 
         socket.on('disconnect', asyncHandler(async () => { // 연결 종료 시
@@ -115,6 +125,7 @@ module.exports = (server) => {
             }
 
             await channel.unbindQueue(queueName, 'alarmExchange', routingKey);
+            await channel.unbindQueue(queueName, 'chatExchange', routingKey);
             console.log(`RabbitMQ에서 해당 라우팅키를 제거합니다.: ${routingKey} -> ${queueName}`);
             delete clients[socket.id]; // 연결 해제 시 클라이언트 목록에서 제거
             console.log(clients);
