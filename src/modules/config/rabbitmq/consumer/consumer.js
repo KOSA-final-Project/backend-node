@@ -13,7 +13,7 @@ const asyncHandler = require('express-async-handler');
 require('dotenv').config();
 const queueHandler = require('../handler/queueHandlers');
 const {v4: uuidv4} = require('uuid');
-const { emitAlarm  } = require('../handler/alarmHandler');
+const {emitAlarm, emitPrivateMessage} = require('../handler/alarmHandler');
 
 const serverId = uuidv4();
 console.log(`ServerID :  ${serverId}`);
@@ -25,10 +25,10 @@ const receiveMessages = async () => {
 		const connection = await amqp.connect(process.env.RABBITMQ_URI);
 		channel = await connection.createChannel();
 
-		await channel.assertExchange('alarmExchange', 'topic', { durable: true });
+		await channel.assertExchange('alarmExchange', 'topic', {durable: true});
 		console.log('Exchange(alarmExchange) 동작확인...');
 
-		await channel.assertExchange('chatExchange', 'topic', { durable: true });
+		await channel.assertExchange('chatExchange', 'fanout', {durable: true});
 		console.log('Exchange(chatExchange) 동작확인...');
 
 		await channel.assertQueue(serverId, {
@@ -59,6 +59,9 @@ const receiveMessages = async () => {
 						break;
 					case 'approval':
 						await handleApprovalMessage(messageContent);
+						break;
+					case 'private':
+						await handlePrivateChat(messageContent);
 						break;
 					default:
 						console.log('지정되지 않은 라우팅 키입니다.');
@@ -91,7 +94,7 @@ const receiveMessages = async () => {
 
 					if (handler) {
 						// 요청 객체를 만들어 핸들러 호출
-						const req = { body: messageContent };
+						const req = {body: messageContent};
 						const res = {
 							status: (code) => ({
 								send: (message) => console.log(`Status: ${code}, Message: ${message}`),
@@ -136,9 +139,21 @@ const handleApprovalMessage = async (message) => {
 	console.log(`Approval 처리 로직 실행: ${JSON.stringify(approvalAlarm)}`);
 };
 
+const handlePrivateChat = async (message) => {
+	const content = JSON.parse(JSON.stringify(message));
+	const privateChat = {
+		type: 'private-message',
+		from: content.from,
+		fromNickname: content.fromNickname,
+		fromImgUrl: content.fromImgUrl,
+		message: content.message,
+		roomId: content.roomId,
+	}
+	emitPrivateMessage(content.roomId, privateChat);
+	console.log(`privateChat 처리 로직 실행: ${JSON.stringify(privateChat)}`);
+}
 
-
-module.exports ={
+module.exports = {
 	receiveMessages,
 	getServerId: () => serverId,
 	getChannel: () => channel,
