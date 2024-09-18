@@ -93,10 +93,11 @@ module.exports = (server) => {
                         roomId: roomId.room_id,
                         target: participant,
                     }
-                    channel.publish('alarmExchange', `user.${participant}`, roomInfo);
+                    const message = Buffer.from(JSON.stringify(roomInfo));
+                    channel.publish('alarmExchange', `user.${participant}`, message);
                 })
             }
-            socket.join(roomId);
+            //socket.join(roomId);
             console.log(`Socket ${socket.id} joined room ${roomId}`);
         });
 
