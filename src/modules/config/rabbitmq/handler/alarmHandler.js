@@ -39,6 +39,19 @@ function emitPrivateMessage(roomId, message) {
 	}
 }
 
+function emitJoinRoom(roomInfo){
+	if(!io) throw new Error('Socket.io 가 초기화 되지 않았습니다.');
+
+	const socketId = clients[roomInfo.target];
+	if(socketId){
+		const socket = io.sockets.sockets.get(socketId);
+		if(socket){
+			socket.join(roomInfo.roomId);
+			console.log(` ${roomInfo.roomId} 방입장 ${roomInfo.roomId}`);
+		}
+	}
+}
+
 function setClients(clientObj) {
 	clients = clientObj;
 }
@@ -48,4 +61,5 @@ module.exports = {
 	emitAlarm,
 	emitPrivateMessage,
 	setClients,
+	emitJoinRoom,
 };
