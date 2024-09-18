@@ -13,7 +13,7 @@ const asyncHandler = require('express-async-handler');
 require('dotenv').config();
 const queueHandler = require('../handler/queueHandlers');
 const {v4: uuidv4} = require('uuid');
-const {emitAlarm, emitPrivateMessage} = require('../handler/alarmHandler');
+const {emitAlarm, emitPrivateMessage, emitJoinRoom} = require('../handler/alarmHandler');
 
 const serverId = uuidv4();
 console.log(`ServerID :  ${serverId}`);
@@ -62,6 +62,9 @@ const receiveMessages = async () => {
 						break;
 					case 'private':
 						await handlePrivateChat(messageContent);
+						break;
+					case 'join':
+						await handleJoinRoom(messageContent);
 						break;
 					default:
 						console.log('지정되지 않은 라우팅 키입니다.');
@@ -151,6 +154,10 @@ const handlePrivateChat = async (message) => {
 	}
 	emitPrivateMessage(content.roomId, privateChat);
 	console.log(`privateChat 처리 로직 실행: ${JSON.stringify(privateChat)}`);
+}
+
+const handleJoinRoom = async (message) => {
+	emitJoinRoom(message);
 }
 
 module.exports = {

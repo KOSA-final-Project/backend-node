@@ -84,6 +84,18 @@ module.exports = (server) => {
 
         // 클라이언트가 특정 채팅방에 입장 (방에 참여)
         socket.on('join room', (roomId) => {
+
+            const channel = getChannel();
+            if(channel) {
+                roomId.participants.forEach((participant) => {
+                    const roomInfo = {
+                        type: "join",
+                        roomId: roomId.room_id,
+                        target: participant,
+                    }
+                    channel.publish('alarmExchange', `user.${participant}`, roomInfo);
+                })
+            }
             socket.join(roomId);
             console.log(`Socket ${socket.id} joined room ${roomId}`);
         });
