@@ -157,7 +157,8 @@ const handlePrivateChat = async (message) => {
 }
 
 const handleJoinRoom = async (message) => {
-	emitJoinRoom(message);
+	const content = JSON.parse(JSON.stringify(message));
+	emitJoinRoom(content);
 }
 
 module.exports = {
