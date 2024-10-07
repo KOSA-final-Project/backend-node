@@ -43,3 +43,4 @@
 - 스프링은 MySQL, 노드는 MongoDB를 이용하고 있어 데이터 동기화를 위해 rabbitMQ를 사용
 - JWT Refresh token 탈취 방지를 위해 redis를 사용
 - 검색 성능을 위해 Open search 사용
+
